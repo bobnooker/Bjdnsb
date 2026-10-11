@@ -1,0 +1,45 @@
+name: RustDesk Remote Desktop
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rustdesk-rdp:
+    runs-on: windows-latest
+    timeout-minutes: 3600
+
+    steps:
+      - name: Download & Install RustDesk
+        run: |
+          Write-Host "Downloading RustDesk installer..."
+          $url = "https://github.com/rustdesk/rustdesk/releases/download/1.3.1/rustdesk-1.3.1-x86_64.exe"
+          $installer = "$env:TEMP\rustdesk-installer.exe"
+          Invoke-WebRequest -Uri $url -OutFile$installer
+
+          Write-Host "Installing RustDesk..."
+          Start-Process -FilePath $installer -ArgumentList "--silent-install" -NoNewWindow -Wait
+          Start-Sleep -Seconds 5
+
+      - name: Configure Password & Fetch ID
+        run: |
+          $rustdesk = "$env:ProgramFiles\RustDesk\rustdesk.exe"
+          
+          # Set connection password
+          & $rustdesk --password MySecurePass123!
+          Start-Sleep -Seconds 3
+
+          # Fetch RustDesk ID (using Out-String to force output capture)
+          $id = (&$rustdesk --get-id | Out-String).Trim()
+
+          Write-Host "`n======================================"
+          Write-Host "RUSTDESK CONNECTION INFO"
+          Write-Host "ID: $id"
+          Write-Host "Password: MySecurePass123!"
+          Write-Host "======================================`n"
+
+      - name: Keep Runner Active
+        run: |
+          while ($true) {
+              Write-Host "[$(Get-Date)] RustDesk Active..."
+              Start-Sleep -Seconds 300
+          }
