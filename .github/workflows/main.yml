@@ -17,17 +17,12 @@ jobs:
           Invoke-WebRequest -Uri $url -OutFile$exePath
           
           Write-Host "Starting RustDesk..."
-          # Run RustDesk directly with a fixed password in the background
           Start-Process -FilePath $exePath -ArgumentList "--password MySecurePass123!" -WindowStyle Hidden
-          
-          # Give it a few seconds to initialize
           Start-Sleep -Seconds 8
 
       - name: Output RustDesk Credentials
         run: |
           $exePath = "$env:TEMP\rustdesk.exe"
-          
-          # Retrieve the automatically assigned RustDesk ID
           $id = &$exePath --get-id
           
           Write-Host "`n======================================"
